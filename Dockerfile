@@ -1,5 +1,8 @@
 FROM node:18-bullseye
 
+# -----------------------------
+# 📌 CHROMIUM + DEPENDÊNCIAS
+# -----------------------------
 RUN apt-get update && apt-get install -y \
     wget \
     fonts-liberation \
@@ -40,21 +43,44 @@ RUN apt-get update && apt-get install -y \
     libxshmfence-dev \
     unzip
 
+# -----------------------------
+# 📌 INSTALL GOOGLE CHROME
+# -----------------------------
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-WORKDIR /usr/src/wpp-server
-
-COPY package.json yarn.lock* package-lock.json* ./
-
-# 🔥 CORREÇÃO CRÍTICA DO ERRO
-RUN npm install --legacy-peer-deps
-
-COPY . .
-
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-EXPOSE 21465
+# -----------------------------
+# 📌 WORKDIR
+# -----------------------------
+WORKDIR /usr/src/wpp-server
 
-CMD ["npm", "start"]
+# -----------------------------
+# 📌 INSTALL DEPENDENCIES
+# -----------------------------
+COPY package.json yarn.lock* package-lock.json* ./
+
+# evita erros de peer dependency
+RUN npm install --legacy-peer-deps
+
+# -----------------------------
+# 📌 COPY PROJECT FILES
+# -----------------------------
+COPY . .
+
+# -----------------------------
+# 📌 BUILD TYPESCRIPT
+# -----------------------------
+RUN npm run build
+
+# -----------------------------
+# 📌 EXPOSE PORT (Railway)
+# -----------------------------
+EXPOSE 8080
+
+# -----------------------------
+# 📌 START SERVER (Railway PORT)
+# -----------------------------
+CMD ["sh", "-c", "PORT=$PORT npm start"]
