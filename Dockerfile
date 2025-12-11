@@ -1,12 +1,14 @@
+# -----------------------------
+# 🟢 BASE IMAGE
+# -----------------------------
 FROM node:18-bullseye
 
-# Dependências que o Chrome precisa para rodar
+# -----------------------------
+# 🟢 INSTALL CHROMIUM + LIBS
+# -----------------------------
 RUN apt-get update && apt-get install -y \
     wget \
-    unzip \
-    fontconfig \
-    locales \
-    gconf-service \
+    fonts-liberation \
     libasound2 \
     libatk1.0-0 \
     libc6 \
@@ -41,21 +43,43 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     xdg-utils \
     libgbm-dev \
-    libxshmfence-dev
+    libxshmfence-dev \
+    unzip
 
-# Baixar e instalar o Google Chrome
+# Download Chrome
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
+# -----------------------------
+# 🟢 SET WORKDIR
+# -----------------------------
 WORKDIR /usr/src/wpp-server
 
-COPY package*.json ./
+# -----------------------------
+# 🟢 COPY PACKAGE FILES FIRST
+# -----------------------------
+COPY package.json yarn.lock* package-lock.json* ./
 
+# Instala dependências
 RUN npm install
 
+# -----------------------------
+# 🟢 COPY ALL FILES
+# -----------------------------
 COPY . .
 
+# -----------------------------
+# 🟢 ENV VAR — chromium path
+# -----------------------------
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
+# -----------------------------
+# 🟢 EXPOSE PORT
+# -----------------------------
 EXPOSE 21465
 
+# -----------------------------
+# 🟢 START SERVER
+# -----------------------------
 CMD ["npm", "start"]
