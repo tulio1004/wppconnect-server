@@ -1,26 +1,26 @@
 import { ServerOptions } from './types/ServerOptions';
 
-export default {
-  secretKey: process.env.SECRET_KEY || 'DEFAULT_SECRET',
-  
-  // Importante: host deve vir do Railway
-  host: process.env.HOST || '0.0.0.0',
+const config: ServerOptions = {
+  secretKey: process.env.SECRET_KEY || 'THISISMYSECURETOKEN',
+  host: process.env.HOST || 'http://localhost',
   port: process.env.PORT || '21465',
 
-  deviceName: 'WppConnect',
+  deviceName: process.env.DEVICE_NAME || 'WppConnectServer',
   poweredBy: 'WPPConnect-Server',
 
   startAllSession: false,
   tokenStoreType: 'file',
-  maxListeners: 20,
+  maxListeners: 15,
 
-  // Caminho ABSOLUTO dentro do container
-  customUserDataDir: '/usr/src/wpp-server/userDataDir/',
+  customUserDataDir:
+    process.env.USER_DATA_DIR || '/usr/src/wpp-server/userDataDir/',
 
   webhook: {
     url: null,
     autoDownload: true,
+    uploadS3: false,
     readMessage: true,
+    allUnreadOnStart: false,
     listenAcks: true,
     onPresenceChanged: true,
     onParticipantsChanged: true,
@@ -34,6 +34,7 @@ export default {
 
   websocket: {
     autoDownload: false,
+    uploadS3: false,
   },
 
   chatwoot: {
@@ -48,40 +49,45 @@ export default {
   },
 
   log: {
-    level: 'info',
-    logger: ['console'],
+    level: 'silly',
+    logger: ['console', 'file'],
   },
 
-  // 🚀 AQUI ESTÁ A CORREÇÃO CRÍTICA
- createOptions: {
-  puppeteerOptions: {
-    executablePath: '/usr/bin/google-chrome-stable',
+  // ---------------------------------------------------
+  // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA DO BROWSER
+  // ---------------------------------------------------
+  createOptions: {
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH ||
+      '/usr/bin/google-chrome-stable',
+
     headless: true,
+
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
+
       '--disable-gpu',
+      '--disable-dev-shm-usage',
       '--disable-software-rasterizer',
       '--disable-extensions',
       '--disable-background-networking',
       '--disable-default-apps',
       '--disable-sync',
       '--disable-translate',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--disable-features=TranslateUI',
-      '--mute-audio',
       '--hide-scrollbars',
+      '--metrics-recording-only',
+      '--mute-audio',
       '--no-first-run',
-      '--no-zygote',
-      '--single-process'
-    ]
-  }
-},
-
-  mapper: {
-    enable: false,
-    prefix: 'tagone-',
+      '--no-default-browser-check',
+      '--ignore-certificate-errors',
+      '--ignore-ssl-errors',
+      '--disable-features=site-per-process',
+      '--window-size=1920,1080',
+    ],
   },
 
-} as unknown as ServerOptions;
+  // ---------------------------------------------------
+};
+
+export default config;
