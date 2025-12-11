@@ -1,11 +1,5 @@
-# -----------------------------
-# 🟢 BASE IMAGE
-# -----------------------------
 FROM node:18-bullseye
 
-# -----------------------------
-# 🟢 INSTALL CHROMIUM + LIBS
-# -----------------------------
 RUN apt-get update && apt-get install -y \
     wget \
     fonts-liberation \
@@ -46,40 +40,21 @@ RUN apt-get update && apt-get install -y \
     libxshmfence-dev \
     unzip
 
-# Download Chrome
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# -----------------------------
-# 🟢 SET WORKDIR
-# -----------------------------
 WORKDIR /usr/src/wpp-server
 
-# -----------------------------
-# 🟢 COPY PACKAGE FILES FIRST
-# -----------------------------
 COPY package.json yarn.lock* package-lock.json* ./
 
-# Instala dependências
-RUN npm install
+# 🔥 CORREÇÃO CRÍTICA DO ERRO
+RUN npm install --legacy-peer-deps
 
-# -----------------------------
-# 🟢 COPY ALL FILES
-# -----------------------------
 COPY . .
 
-# -----------------------------
-# 🟢 ENV VAR — chromium path
-# -----------------------------
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# -----------------------------
-# 🟢 EXPOSE PORT
-# -----------------------------
 EXPOSE 21465
 
-# -----------------------------
-# 🟢 START SERVER
-# -----------------------------
 CMD ["npm", "start"]
