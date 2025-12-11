@@ -1,15 +1,20 @@
 import { ServerOptions } from './types/ServerOptions';
 
-export default {
-  secretKey: 'THISISMYSECURETOKEN',
-  host: 'http://localhost',
-  port: '21465',
-  deviceName: 'WppConnect',
+const config: ServerOptions = {
+  secretKey: process.env.SECRET_KEY || 'THISISMYSECURETOKEN',
+  host: process.env.HOST || 'http://localhost',
+  port: process.env.PORT || '21465',
+
+  deviceName: process.env.DEVICE_NAME || 'WppConnectServer',
   poweredBy: 'WPPConnect-Server',
-  startAllSession: true,
+
+  startAllSession: false,
   tokenStoreType: 'file',
   maxListeners: 15,
-  customUserDataDir: './userDataDir/',
+
+  customUserDataDir:
+    process.env.USER_DATA_DIR || '/usr/src/wpp-server/userDataDir/',
+
   webhook: {
     url: null,
     autoDownload: true,
@@ -26,89 +31,63 @@ export default {
     onSelfMessage: false,
     ignore: ['status@broadcast'],
   },
+
   websocket: {
     autoDownload: false,
     uploadS3: false,
   },
+
   chatwoot: {
     sendQrCode: true,
     sendStatus: true,
   },
+
   archive: {
     enable: false,
     waitTime: 10,
     daysToArchive: 45,
   },
+
   log: {
-    level: 'silly', // Before open a issue, change level to silly and retry a action
+    level: 'silly',
     logger: ['console', 'file'],
   },
+
+  // ---------------------------------------------------
+  // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA DO BROWSER
+  // ---------------------------------------------------
   createOptions: {
-    browserArgs: [
-      '--disable-web-security',
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH ||
+      '/usr/bin/google-chrome-stable',
+
+    headless: true,
+
+    args: [
       '--no-sandbox',
-      '--disable-web-security',
-      '--aggressive-cache-discard',
-      '--disable-cache',
-      '--disable-application-cache',
-      '--disable-offline-load-stale-cache',
-      '--disk-cache-size=0',
+      '--disable-setuid-sandbox',
+
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      '--disable-software-rasterizer',
+      '--disable-extensions',
       '--disable-background-networking',
       '--disable-default-apps',
-      '--disable-extensions',
       '--disable-sync',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
       '--disable-translate',
       '--hide-scrollbars',
       '--metrics-recording-only',
       '--mute-audio',
       '--no-first-run',
-      '--safebrowsing-disable-auto-update',
+      '--no-default-browser-check',
       '--ignore-certificate-errors',
       '--ignore-ssl-errors',
-      '--ignore-certificate-errors-spki-list',
+      '--disable-features=site-per-process',
+      '--window-size=1920,1080',
     ],
-    /**
-     * Example of configuring the linkPreview generator
-     * If you set this to 'null', it will use global servers; however, you have the option to define your own server
-     * Clone the repository https://github.com/wppconnect-team/wa-js-api-server and host it on your server with ssl
-     *
-     * Configure the attribute as follows:
-     * linkPreviewApiServers: [ 'https://www.yourserver.com/wa-js-api-server' ]
-     */
-    linkPreviewApiServers: null,
+  },
 
-    /**
-     * Set specific whatsapp version
-     */
-    // whatsappVersion: '2.xxxxx',
-  },
-  mapper: {
-    enable: false,
-    prefix: 'tagone-',
-  },
-  db: {
-    mongodbDatabase: 'tokens',
-    mongodbCollection: '',
-    mongodbUser: '',
-    mongodbPassword: '',
-    mongodbHost: '',
-    mongoIsRemote: true,
-    mongoURLRemote: '',
-    mongodbPort: 27017,
-    redisHost: 'localhost',
-    redisPort: 6379,
-    redisPassword: '',
-    redisDb: 0,
-    redisPrefix: 'docker',
-  },
-  aws_s3: {
-    region: 'sa-east-1' as any,
-    access_key_id: null,
-    secret_key: null,
-    defaultBucketName: null,
-    endpoint: null,
-    forcePathStyle: null,
-  },
-} as unknown as ServerOptions;
+  // ---------------------------------------------------
+};
+
+export default config;
