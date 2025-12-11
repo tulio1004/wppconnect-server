@@ -50,7 +50,10 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
+# Puppeteer vars for Chrome
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV CHROME_DEVEL_SANDBOX=/usr/bin/google-chrome-stable
 
 # -----------------------------
 # 📌 WORKDIR
@@ -62,11 +65,10 @@ WORKDIR /usr/src/wpp-server
 # -----------------------------
 COPY package.json yarn.lock* package-lock.json* ./
 
-# evita erros de peer dependency
 RUN npm install --legacy-peer-deps
 
 # -----------------------------
-# 📌 COPY PROJECT FILES
+# 📌 COPY ALL FILES
 # -----------------------------
 COPY . .
 
@@ -81,6 +83,6 @@ RUN npm run build
 EXPOSE 8080
 
 # -----------------------------
-# 📌 START SERVER (Railway PORT)
+# 📌 START SERVER USING RAILWAY PORT
 # -----------------------------
 CMD ["sh", "-c", "PORT=$PORT npm start"]
