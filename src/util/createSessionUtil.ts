@@ -54,11 +54,30 @@ export default class CreateSessionUtil {
 
       this.startChatWootClient(client);
 
-      if (req.serverOptions.customUserDataDir) {
-        req.serverOptions.createOptions.puppeteerOptions = {
-          userDataDir: req.serverOptions.customUserDataDir + session,
-        };
-      }
+    if (req.serverOptions.customUserDataDir) {
+  const currentOptions = req.serverOptions.createOptions || {};
+
+  const existingPuppeteerOptions =
+    (currentOptions as any).puppeteerOptions || {};
+
+  const browserArgs = (currentOptions as any).browserArgs || [];
+
+  // Garante que sempre vamos ter --no-sandbox e --disable-setuid-sandbox
+  req.serverOptions.createOptions = {
+    ...currentOptions,
+    puppeteerOptions: {
+      ...existingPuppeteerOptions,
+      userDataDir: req.serverOptions.customUserDataDir + session,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        ...browserArgs,
+        ...(existingPuppeteerOptions as any).args || [],
+      ],
+    },
+  } as any;
+}
+
 
       const wppClient = await create(
         Object.assign(
