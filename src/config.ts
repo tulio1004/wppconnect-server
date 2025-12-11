@@ -56,21 +56,17 @@ const config: ServerOptions = {
   // ---------------------------------------------------
   // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA DO BROWSER
   // ---------------------------------------------------
-  createOptions: {
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH ||
-      '/usr/bin/google-chrome-stable',
-
+ createOptions: {
+  puppeteerOptions: {
     headless: true,
-
+    executablePath: '/usr/bin/google-chrome-stable',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-
-      '--disable-gpu',
       '--disable-dev-shm-usage',
-      '--disable-software-rasterizer',
+      '--disable-gpu',
       '--disable-extensions',
+      '--disable-features=IsolateOrigins,site-per-process',
       '--disable-background-networking',
       '--disable-default-apps',
       '--disable-sync',
@@ -79,13 +75,11 @@ const config: ServerOptions = {
       '--metrics-recording-only',
       '--mute-audio',
       '--no-first-run',
-      '--no-default-browser-check',
       '--ignore-certificate-errors',
       '--ignore-ssl-errors',
-      '--disable-features=site-per-process',
-      '--window-size=1920,1080',
     ],
   },
+},
 
   // ---------------------------------------------------
 };
