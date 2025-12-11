@@ -53,37 +53,31 @@ export default {
   },
 
   // 🚀 AQUI ESTÁ A CORREÇÃO CRÍTICA
-  createOptions: {
-    puppeteerOptions: {
-      executablePath: '/usr/bin/google-chrome-stable',
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-background-networking',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-breakpad',
-        '--disable-client-side-phishing-detection',
-        '--disable-component-update',
-        '--disable-default-apps',
-        '--disable-extensions',
-        '--disable-features=TranslateUI',
-        '--disable-ipc-flooding-protection',
-        '--disable-popup-blocking',
-        '--disable-renderer-backgrounding',
-        '--disable-sync',
-        '--force-color-profile=srgb',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-first-run',
-        '--no-zygote',
-        '--password-store=basic',
-        '--use-mock-keychain',
-      ]
-    }
-  },
+ createOptions: {
+  puppeteerOptions: {
+    executablePath: '/usr/bin/google-chrome-stable',
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--disable-translate',
+      '--disable-features=IsolateOrigins,site-per-process',
+      '--disable-features=TranslateUI',
+      '--mute-audio',
+      '--hide-scrollbars',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process'
+    ]
+  }
+},
 
   mapper: {
     enable: false,
