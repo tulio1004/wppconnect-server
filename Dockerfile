@@ -1,8 +1,8 @@
 FROM node:18-bullseye
 
-# -----------------------------
-# 📌 CHROMIUM + DEPENDÊNCIAS
-# -----------------------------
+# -----------------------------------
+# 1) Dependências do Chrome / Puppeteer
+# -----------------------------------
 RUN apt-get update && apt-get install -y \
     wget \
     fonts-liberation \
@@ -41,48 +41,48 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libgbm-dev \
     libxshmfence-dev \
-    unzip
+    unzip \
+  && rm -rf /var/lib/apt/lists/*
 
-# -----------------------------
-# 📌 INSTALL GOOGLE CHROME
-# -----------------------------
+# -----------------------------------
+# 2) Instala Google Chrome
+# -----------------------------------
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# Puppeteer vars for Chrome
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV CHROME_DEVEL_SANDBOX=/usr/bin/google-chrome-stable
 
-# -----------------------------
-# 📌 WORKDIR
-# -----------------------------
+# -----------------------------------
+# 3) Diretório da aplicação
+# -----------------------------------
 WORKDIR /usr/src/wpp-server
 
-# -----------------------------
-# 📌 INSTALL DEPENDENCIES
-# -----------------------------
+# Copia apenas arquivos de dependência primeiro (melhor cache)
 COPY package.json yarn.lock* package-lock.json* ./
 
+# Resolve as dependências mesmo com conflitos de peer-deps
 RUN npm install --legacy-peer-deps
 
-# -----------------------------
-# 📌 COPY ALL FILES
-# -----------------------------
+# Copia o resto do projeto
 COPY . .
 
-# -----------------------------
-# 📌 BUILD TYPESCRIPT
-# -----------------------------
+# Compila o TypeScript -> dist/
 RUN npm run build
 
-# -----------------------------
-# 📌 EXPOSE PORT (Railway)
-# -----------------------------
+# -----------------------------------
+# 4) Criar usuário NÃO-root para rodar o Chrome
+# -----------------------------------
+RUN useradd -m pptruser && \
+    mkdir -p /usr/src/wpp-server/userDataDir && \
+    chown -R pptruser:pptruser /usr/src/wpp-server
+
+USER pptruser
+
+# -----------------------------------
+# 5) Porta + Start
+# -----------------------------------
 EXPOSE 8080
 
-# -----------------------------
-# 📌 START SERVER USING RAILWAY PORT
-# -----------------------------
-CMD ["sh", "-c", "PORT=$PORT npm start"]
+CMD ["sh", "-c", "PORT=${PORT:-8080} npm start"]
